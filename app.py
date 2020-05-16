@@ -6,11 +6,11 @@ app = Flask(__name__)
 
 @app.route("/status")
 def status():
-    return("Running")
+    return("The Plugin Flask Server is up and running")
 
 @app.route("/evaluate", methods=["POST", "GET"])
 def evaluate():
-    return("Accepted")
+    return("The type sent is an accepted type")
 
 @app.route("/run", methods=["POST"])
 def run():
