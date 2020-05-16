@@ -1,5 +1,4 @@
 from flask import Flask, request, abort
-from retrieve_html import retrieve_html
 import os
 
 app = Flask(__name__)
