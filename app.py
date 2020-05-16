@@ -1,41 +1,38 @@
-#FLASK_APP=app.py flask run
 from flask import Flask, request, abort
 from retrieve_html import retrieve_html
 import os
 
 app = Flask(__name__)
 
-#flask run --host=0.0.0.0
-@app.route("/sankey/status")
-def imdoingfine():
-    return("Not dead Jet")
+@app.route("/status")
+def status():
+    return("The Plugin Flask Server is up and running")
 
-@app.route("/sankey/evaluate", methods=["POST", "GET"])
-def evalsankey():
-    return("Not dead Jet")
+@app.route("/evaluate", methods=["POST", "GET"])
+def evaluate():
+    return("The type sent is an accepted type")
 
-
-@app.route("/sankey/run", methods=["POST"])
-def wrapper():
+@app.route("/run", methods=["POST"])
+def run():
     cwd = os.getcwd()
     filename = os.path.join(cwd, "Test.html")
     
     data = request.json
 
     url = data['complete_sbol'].replace('/sbol','')
-    instance = data['instanceUrl'].replace('/sbol','')
+    instance = data['instanceUrl']
     uri = data['top_level']
 
     try:
-        #obtain the html from the test file
-        result = retrieve_html(filename)
-        
-        #put in the url, uri, and instance given by synbiohub
-        result = result.replace("URL_REPLACE", url)
-        result = result.replace("URI_REPLACE", uri)
-        result = result.replace("INSTANCE_REPLACE", instance)
+        with open(filename, 'r') as htmlfile:
+            result = htmlfile.read()
+
+            #put in the url, uri, and instance given by synbiohub
+            result = result.replace("URL_REPLACE", url)
+            result = result.replace("URI_REPLACE", uri)
+            result = result.replace("INSTANCE_REPLACE", instance)
      
-        return result 
+            return result 
     except Exception as e:
         print(e)
         abort(404)
