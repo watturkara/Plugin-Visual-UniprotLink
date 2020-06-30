@@ -18,9 +18,9 @@ def run():
     
     data = request.json
 
-    url = data['complete_sbol'].replace('/sbol','')
-    instance = data['instanceUrl']
-    uri = data['top_level']
+    #url = data['complete_sbol'].replace('/sbol','')
+    #instance = data['instanceUrl']
+    #uri = data['top_level']
 
     try:
         with open(filename, 'r') as htmlfile:
