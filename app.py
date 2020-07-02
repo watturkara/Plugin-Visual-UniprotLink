@@ -18,18 +18,20 @@ def run():
     
     data = request.json
 
-    #url = data['complete_sbol'].replace('/sbol','')
-    #instance = data['instanceUrl']
-    #uri = data['top_level']
+    url = data['complete_sbol'].replace('/sbol','')
+    instance = data['instanceUrl']
+    uri = data['top_level']
 
     try:
         with open(filename, 'r') as htmlfile:
             result = htmlfile.read()
 
             #put in the url, uri, and instance given by synbiohub
-            #result = result.replace("URL_REPLACE", url)
-            #result = result.replace("URI_REPLACE", uri)
-            #result = result.replace("INSTANCE_REPLACE", instance)
+            result = result.replace("URL_REPLACE", url)
+            result = result.replace("URI_REPLACE", uri)
+            result = result.replace("INSTANCE_REPLACE", instance)
+            
+            result = result.replace("REQUEST_REPLACE", data)
      
             return result 
     except Exception as e:
