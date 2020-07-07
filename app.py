@@ -31,7 +31,7 @@ def run():
         result = result.replace("URI_REPLACE", uri)
         result = result.replace("INSTANCE_REPLACE", instance)
            
-        #result = result.replace("REQUEST_REPLACE", data)
+        result = result.replace("REQUEST_REPLACE", str(data))
             
         return result
     except Exception as e:
