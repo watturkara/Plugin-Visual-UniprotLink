@@ -14,13 +14,15 @@ def evaluate():
 @app.route("/run", methods=["POST"])
 def run():
     data = request.get_json(force=True)
+    
+    url = data['complete_sbol'].replace('/sbol','')
+    instance = data['instanceUrl']
+    uri = data['top_level']
+    
+    cwd = os.getcwd()
+    filename = os.path.join(cwd, "Test.html")
+    
     return jsonify(data)
-    #cwd = os.getcwd()
-    #filename = os.path.join(cwd, "Test.html")
-    #
-    #data = request.get_json(force=True)
-    #return jsonify(data)
-    #
     #url = data['complete_sbol'].replace('/sbol','')
     #instance = data['instanceUrl']
     #uri = data['top_level']
