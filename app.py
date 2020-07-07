@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route("/status")
 def status():
-    return("The Plugin Flask Server is up and running")
+    return("The Visualisation Test Plugin Flask Server is up and running")
 
 @app.route("/evaluate", methods=["POST", "GET"])
 def evaluate():
@@ -16,7 +16,7 @@ def run():
     #cwd = os.getcwd()
     #filename = os.path.join(cwd, "Test.html")
     
-    data = request.json
+    data = request.get_json(force=True)
     return jsonify(data)
 
     #url = data['complete_sbol'].replace('/sbol','')
