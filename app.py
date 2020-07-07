@@ -13,7 +13,8 @@ def evaluate():
 
 @app.route("/run", methods=["POST"])
 def run():
-    return("The run sent went okay")
+    data = request.get_json(force=True)
+    return jsonify(data)
     #cwd = os.getcwd()
     #filename = os.path.join(cwd, "Test.html")
     #
