@@ -13,11 +13,11 @@ def evaluate():
 
 @app.route("/run", methods=["POST"])
 def run():
-    cwd = os.getcwd()
-    filename = os.path.join(cwd, "Test.html")
+    #cwd = os.getcwd()
+    #filename = os.path.join(cwd, "Test.html")
     
-    data = request.json
-    return data
+    #data = request.json
+    return("The endpoint works")
 
     #url = data['complete_sbol'].replace('/sbol','')
     #instance = data['instanceUrl']
