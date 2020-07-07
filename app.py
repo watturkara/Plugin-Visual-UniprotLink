@@ -13,29 +13,31 @@ def evaluate():
 
 @app.route("/run", methods=["POST"])
 def run():
+    return("The run sent went okay")
     #cwd = os.getcwd()
     #filename = os.path.join(cwd, "Test.html")
-    
-    data = request.get_json(force=True)
-    return jsonify(data)
-
+    #
+    #data = request.get_json(force=True)
+    #return jsonify(data)
+    #
     #url = data['complete_sbol'].replace('/sbol','')
     #instance = data['instanceUrl']
     #uri = data['top_level']
-
+    #
     #try:
         #with open(filename, 'r') as htmlfile:
             #result = htmlfile.read()
             #print("Hello")
-
+            #
             #put in the url, uri, and instance given by synbiohub
             #result = result.replace("URL_REPLACE", url)
             #result = result.replace("URI_REPLACE", uri)
             #result = result.replace("INSTANCE_REPLACE", instance)
-            
+            #
         #result = result.replace("REQUEST_REPLACE", data)
-     
+        #
         #return result 
     #except Exception as e:
         #print(e)
         #abort(404)
+#
