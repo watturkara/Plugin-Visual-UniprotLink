@@ -33,7 +33,7 @@ def run():
             
             #result = result.replace("REQUEST_REPLACE", data)
             
-            return result
+        return result
     except Exception as e:
         print(e)
         abort(404)
