@@ -17,7 +17,7 @@ def run():
     #filename = os.path.join(cwd, "Test.html")
     
     data = request.json
-    return data
+    return jsonify(data)
 
     #url = data['complete_sbol'].replace('/sbol','')
     #instance = data['instanceUrl']
