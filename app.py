@@ -26,14 +26,14 @@ def run():
         with open(filename, 'r') as htmlfile:
             result = htmlfile.read()
             
-        #put in the url, uri, and instance given by synbiohub
-        result = result.replace("URL_REPLACE", url)
-        result = result.replace("URI_REPLACE", uri)
-        result = result.replace("INSTANCE_REPLACE", instance)
+            #put in the url, uri, and instance given by synbiohub
+            result = result.replace("URL_REPLACE", url)
+            result = result.replace("URI_REPLACE", uri)
+            result = result.replace("INSTANCE_REPLACE", instance)
             
-        result = result.replace("REQUEST_REPLACE", data)
-        
-        #return result 
+            result = result.replace("REQUEST_REPLACE", data)
+            
+            #return result 
     except Exception as e:
         print(e)
         abort(404)
