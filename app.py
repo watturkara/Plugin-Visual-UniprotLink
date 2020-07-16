@@ -36,4 +36,4 @@ def run():
         return result
     except Exception as e:
         print(e)
-        abort(404)
+        abort(400)
