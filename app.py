@@ -9,7 +9,31 @@ def status():
 
 @app.route("/evaluate", methods=["POST", "GET"])
 def evaluate():
-    return("The type sent is an accepted type")
+    data = request.get_json(force=True)
+    rdf_type = data['type']
+    
+    ########## REPLACE THIS SECTION WITH OWN RUN CODE #################
+    #uses rdf types
+    accepted_types = {'Activity', 'Agent', 'Association', 'Attachment', 'Collection',
+                      'CombinatorialDerivation', 'Component', 'ComponentDefinition',
+                      'Cut', 'Experiment', 'ExperimentalData',
+                      'FunctionalComponent','GenericLocation',
+                      'Implementation', 'Interaction', 'Location',
+                      'MapsTo', 'Measure', 'Model', 'Module', 'ModuleDefinition'
+                      'Participation', 'Plan', 'Range', 'Sequence',
+                      'SequenceAnnotation', 'SequenceConstraint',
+                      'Usage', 'VariableComponent'}
+    
+    acceptable = rdf_type in accepted_types
+    
+    # #to ensure it shows up on all pages
+    # acceptable = True
+    ################## END SECTION ####################################
+    
+    if acceptable:
+        return f'The type sent ({rdf_type}) is an accepted type', 200
+    else:
+        return f'The type sent ({rdf_type}) is NOT an accepted type', 415
 
 @app.route("/run", methods=["POST"])
 def run():
