@@ -111,7 +111,7 @@ if(find_if_prot(filename, term_list)):
             full_response = full_response +"www.ncbi.nlm.nih.gov/nuccore/" + responseBody["dbReferences"][0]["id"] + "\n"
             graphicCode = find_if_graphic(responseBody["dbReferences"])
             if graphicCode != "":
-                full_response = full_response + "cdn.rcsb.org/images/structures/" + graphicCode[-1:-1].lower() + "/" + graphicCode.lower()  + "/" + graphicCode.lower() + "_model-1.jpeg" + "\n"
+                full_response = full_response + "cdn.rcsb.org/images/structures/" + graphicCode[1:-1].lower() + "/" + graphicCode.lower()  + "/" + graphicCode.lower() + "_model-1.jpeg" + "\n"
             else:
                 full_response = full_response + "\n"
             full_response = full_response + responseBody["sequence"]["sequence"] + "\n"
