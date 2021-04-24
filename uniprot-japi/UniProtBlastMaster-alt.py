@@ -83,75 +83,85 @@ def evaluate():
     acceptable = rdf_type in accepted_types
 
     if acceptable:
-        return f'The type sent ({rdf_type}) is an accepted type', 200
+        #retrieve url for sbol file
+        data = request.get_json(force=True)
+        url = data['complete_sbol']
+
+        #Retrieve sbol file as string
+        resp=http_req.get(url)
+        sbol_string=resp.text
+
+        #Check whether a protein
+        if(find_if_prot(sbol_string, term_list)):
+            return f'The type sent ({rdf_type}) is an accepted type', 200
+        else:
+            return f'The type sent ({rdf_type}) is NOT an accepted type', 415
     else:
         return f'The type sent ({rdf_type}) is NOT an accepted type', 415
 
 #Retrieve information from UniProt and
 @app.route("/run", methods=["POST"])
 def run():
+    #retrieve url for sbol file
     data = request.get_json(force=True)
-
     url = data['complete_sbol']
 
+    #Retrieve sbol file as string
     resp=http_req.get(url)
     sbol_string=resp.text
 
-    #If the component is a protein, retrive the nucleotide sequence
-    if(find_if_prot(sbol_string, term_list)):
-        root = ET.fromstring(sbol_string)
-        seq = root.find('sbol:Sequence', ns)
-        ele =seq.find('sbol:elements', ns)
-        nucSeq = Seq(ele.text)
+    #Parse for nucleotide sequence
+    root = ET.fromstring(sbol_string)
+    seq = root.find('sbol:Sequence', ns)
+    ele =seq.find('sbol:elements', ns)
+    nucSeq = Seq(ele.text)
 
-        #Translate nucleotide sequence into amino acid sequence
-        protSeq = str(nucSeq.translate())
+    #Translate nucleotide sequence into amino acid sequence
+    protSeq = str(nucSeq.translate())
 
-        #Run blast
-        commandInput = "BlastMod " + protSeq
-        subprocess.run(["sh","./runBlast.sh"],text=True,input=commandInput)
+    #Run blast
+    commandInput = "BlastMod " + protSeq
+    subprocess.run(["sh","./runBlast.sh"],text=True,input=commandInput)
 
-        #Retreive accessions
-        my_file = open("Results.txt")
-        content = my_file.readlines()
-        my_file.close()
+    #Retreive accessions
+    my_file = open("Results.txt")
+    content = my_file.readlines()
+    my_file.close()
 
-        #Check whether hits were returned
-        if content[0] != "None":
-            #Collect necessary information
-            full_response = ""
-            for access in content:
-                requestURL_base = "https://www.ebi.ac.uk/proteins/api/proteins/"
-                requestURL = requestURL_base + access[:-1]
-                full_response = full_response + "www.uniprot.org/uniprot/" + access[:-1] + "\n"
+    #Check whether hits were returned
+    if content[0] != "None":
+        #Collect necessary information
+        full_response = ""
+        for access in content:
+            requestURL_base = "https://www.ebi.ac.uk/proteins/api/proteins/"
+            requestURL = requestURL_base + access[:-1]
+            full_response = full_response + "www.uniprot.org/uniprot/" + access[:-1] + "\n"
 
-                r = requests.get(requestURL, headers={ "Accept" : "application/json"})
+            r = requests.get(requestURL, headers={ "Accept" : "application/json"})
 
-                if not r.ok:
-                    r.raise_for_status()
-                    sys.exit()
+            if not r.ok:
+                r.raise_for_status()
+                sys.exit()
 
-                responseBody = r.text
-                responseBody = json.loads(responseBody)
-                full_response = full_response + responseBody["protein"]["recommendedName"]["fullName"]["value"] + "\n"
-                full_response = full_response + responseBody["organism"]["names"][0]["value"] + "\n"
-                full_response = full_response + responseBody["references"][0]["citation"]["title"] + "\n"
-                for author in responseBody["references"][0]["citation"]["authors"]:
-                    full_response = full_response + author + ", "
-                full_response = full_response[:-2] + "\n"
-                full_response = full_response + responseBody["references"][0]["citation"]["publication"]["journalName"] + "\n"
-                full_response = full_response +"www.ncbi.nlm.nih.gov/nuccore/" + responseBody["dbReferences"][0]["id"] + "\n"
-                graphicCode = find_if_graphic(responseBody["dbReferences"])
-                if graphicCode != "":
-                    full_response = full_response + "cdn.rcsb.org/images/structures/" + graphicCode[1:-1].lower() + "/" + graphicCode.lower()  + "/" + graphicCode.lower() + "_model-1.jpeg" + "\n"
-                else:
-                    full_response = full_response + "\n"
-                full_response = full_response + responseBody["sequence"]["sequence"] + "\n"
+            responseBody = r.text
+            responseBody = json.loads(responseBody)
+            full_response = full_response + responseBody["protein"]["recommendedName"]["fullName"]["value"] + "\n"
+            full_response = full_response + responseBody["organism"]["names"][0]["value"] + "\n"
+            full_response = full_response + responseBody["references"][0]["citation"]["title"] + "\n"
+            for author in responseBody["references"][0]["citation"]["authors"]:
+                full_response = full_response + author + ", "
+            full_response = full_response[:-2] + "\n"
+            full_response = full_response + responseBody["references"][0]["citation"]["publication"]["journalName"] + "\n"
+            full_response = full_response +"www.ncbi.nlm.nih.gov/nuccore/" + responseBody["dbReferences"][0]["id"] + "\n"
+            graphicCode = find_if_graphic(responseBody["dbReferences"])
+            if graphicCode != "":
+                full_response = full_response + "cdn.rcsb.org/images/structures/" + graphicCode[1:-1].lower() + "/" + graphicCode.lower()  + "/" + graphicCode.lower() + "_model-1.jpeg" + "\n"
+            else:
                 full_response = full_response + "\n"
-        else:
-            full_response = "No Results"
+            full_response = full_response + responseBody["sequence"]["sequence"] + "\n"
+            full_response = full_response + "\n"
     else:
-        full_response = "Not a protein"
+        full_response = "No Results"
 
     #Write info to file
     my_file = open("Results.txt","w")
