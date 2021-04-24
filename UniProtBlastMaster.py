@@ -151,9 +151,7 @@ def run():
                 refSet=["EMBL","PDB"]
                 references = []
                 for ref in responseBody["dbReferences"]:
-                    print("Here")
                     if ref["type"] in refSet:
-                        print("here")
                         if ref['type']=='EMBL':
                             references.append({
                                 "type":ref['type'],
@@ -186,7 +184,7 @@ def run():
                     },
                     "crossref":references
                 })
-            print(full_response)
+
         else:
             full_response = "No Results"
     else:
