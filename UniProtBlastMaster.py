@@ -28,7 +28,7 @@ ns = {
 }
 
 #Protein related terms for sbol parsing
-term_list = ['http://identifiers.org/so/SO:0000316',"http://wiki.synbiohub.org/wiki/Terms/igem#feature/cds",
+term_list = ["http://identifiers.org/so/SO:0000316","http://wiki.synbiohub.org/wiki/Terms/igem#feature/cds",
     "http://wiki.synbiohub.org/wiki/Terms/igem#partType/Protein_Domain","http://wiki.synbiohub.org/wiki/Terms/igem#feature/protein",
     "http://identifiers.org/so/SO:0000417","http://wiki.synbiohub.org/wiki/Terms/igem#partType/Coding",
     "http://identifiers.org/so/SO:0001069","http://identifiers.org/so/SO:0000104",
@@ -119,11 +119,12 @@ def run():
         #Check whether hits were returned
         if content[0] != "None":
             #Collect necessary information
-            full_response = ""
+            full_response = []
             for access in content:
                 requestURL_base = "https://www.ebi.ac.uk/proteins/api/proteins/"
-                requestURL = requestURL_base + access[:-1]
-                full_response = full_response + "www.uniprot.org/uniprot/" + access[:-1] + "\n"
+                accession = access[:-1]
+                requestURL = requestURL_base + accession
+                uniLink = "www.uniprot.org/uniprot/" + accession
 
                 r = requests.get(requestURL, headers={ "Accept" : "application/json"})
 
@@ -133,30 +134,63 @@ def run():
 
                 responseBody = r.text
                 responseBody = json.loads(responseBody)
-                full_response = full_response + responseBody["protein"]["recommendedName"]["fullName"]["value"] + "\n"
-                full_response = full_response + responseBody["organism"]["names"][0]["value"] + "\n"
-                full_response = full_response + responseBody["references"][0]["citation"]["title"] + "\n"
+
+                #Get protein info
+                protName = responseBody["protein"]["recommendedName"]["fullName"]["value"]
+                orgName = responseBody["organism"]["names"][0]["value"]
+                protSeq = responseBody["sequence"]["sequence"]
+
+                #Get publication info
+                title = responseBody["references"][0]["citation"]["title"]
+                authors = []
                 for author in responseBody["references"][0]["citation"]["authors"]:
-                    full_response = full_response + author + ", "
-                full_response = full_response[:-2] + "\n"
-                full_response = full_response + responseBody["references"][0]["citation"]["publication"]["journalName"] + "\n"
-                full_response = full_response +"www.ncbi.nlm.nih.gov/nuccore/" + responseBody["dbReferences"][0]["id"] + "\n"
-                graphicCode = find_if_graphic(responseBody["dbReferences"])
-                if graphicCode != "":
-                    full_response = full_response + "cdn.rcsb.org/images/structures/" + graphicCode[1:-1].lower() + "/" + graphicCode.lower()  + "/" + graphicCode.lower() + "_model-1.jpeg" + "\n"
-                else:
-                    full_response = full_response + "\n"
-                full_response = full_response + responseBody["sequence"]["sequence"] + "\n"
-                full_response = full_response + "\n"
+                    authors.append({"name":author})
+                journal = responseBody["references"][0]["citation"]["publication"]["journalName"]
+
+                #Get crossreferences
+                refSet=["EMBL","PDB"]
+                references = []
+                for ref in responseBody["dbReferences"]:
+                    print("Here")
+                    if ref["type"] in refSet:
+                        print("here")
+                        if ref['type']=='EMBL':
+                            references.append({
+                                "type":ref['type'],
+                                "id":"www.ncbi.nlm.nih.gov/nuccore/" + ref["id"]
+                            })
+                        elif ref['type']=='PDB':
+                            references.append({
+                                "type":ref['type'],
+                                "id":"cdn.rcsb.org/images/structures/" + ref["id"][1:-1].lower() + "/" + ref["id"].lower()  + "/" + ref["id"].lower() + "_model-1.jpeg"
+                            })
+                        else:
+                            references.append({
+                                "type":ref['type'],
+                                "id":ref["id"]
+                            })
+
+                #Add to full_response
+                full_response.append({
+                    "accession":accession,
+                    "url":uniLink,
+                    "data":{
+                        "Name":protName,
+                        "Organism":orgName,
+                        "Sequence":protSeq
+                    },
+                    "citation":{
+                        "Title":title,
+                        "Authors":authors,
+                        "Journal":journal
+                    },
+                    "crossref":references
+                })
+            print(full_response)
         else:
             full_response = "No Results"
     else:
         full_response = "Not a protein"
-
-    #Write info to file
-    my_file = open("Results.txt","w")
-    my_file.write(full_response)
-    my_file.close()
 
     cwd = os.getcwd()
     filename = os.path.join(cwd, "Test.html")
@@ -167,6 +201,7 @@ def run():
 
         #####################################
         #html stuff goes here
+        result = result.replace("URL_REPLACE", "sup")
         #####################################
 
 
@@ -174,3 +209,6 @@ def run():
     except Exception as e:
         print(e)
         abort(400)
+
+if __name__=="__main__":
+    app.run(host="0.0.0.0",port=5000)
