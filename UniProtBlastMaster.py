@@ -108,8 +108,8 @@ def run():
         protSeq = str(nucSeq.translate())
 
         #Run blast
-        commandInput = "BlastMod " + protSeq
-        subprocess.run(["sh","./runBlast.sh"],text=True,input=commandInput)
+        subprocess.run(["javac", "-d", "classes", "-classpath", "lib/*", "BlastMod.java"])
+        subprocess.run(["java", "-classpath", "classes:lib/*", "uk.ac.ebi.uniprot.dataservice.client.examples.BlastMod", protSeq])
 
         #Retreive accessions
         my_file = open("Results.txt")
