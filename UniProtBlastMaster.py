@@ -97,7 +97,7 @@ def run():
     resp=http_req.get(url)
     sbol_string=resp.text
 
-    #If the component is a protein, retrive the nucleotide sequence
+    #If the component is a protein, retrieve the nucleotide sequence
     if(find_if_prot(sbol_string, term_list)):
         root = ET.fromstring(sbol_string)
         seq = root.find('sbol:Sequence', ns)
