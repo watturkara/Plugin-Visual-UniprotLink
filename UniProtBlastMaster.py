@@ -120,11 +120,12 @@ def run():
         if content[0] != "None":
             #Collect necessary information
             full_response = []
+            full_response = {"status": "success", "data":[]}
             for access in content:
                 requestURL_base = "https://www.ebi.ac.uk/proteins/api/proteins/"
                 accession = access[:-1]
                 requestURL = requestURL_base + accession
-                uniLink = "www.uniprot.org/uniprot/" + accession
+                uniLink = "https://www.uniprot.org/uniprot/" + accession
 
                 r = requests.get(requestURL, headers={ "Accept" : "application/json"})
 
@@ -144,23 +145,28 @@ def run():
                 title = responseBody["references"][0]["citation"]["title"]
                 authors = []
                 for author in responseBody["references"][0]["citation"]["authors"]:
-                    authors.append({"name":author})
+                    authors.append(author)
                 journal = responseBody["references"][0]["citation"]["publication"]["journalName"]
 
                 #Get crossreferences
                 refSet=["EMBL","PDB"]
                 references = []
+                seen_type=[]
                 for ref in responseBody["dbReferences"]:
-                    if ref["type"] in refSet:
+                    if ref["type"] in refSet and ref["type"] not in seen_type:
+                        seen_type.append(ref["type"])
                         if ref['type']=='EMBL':
                             references.append({
                                 "type":ref['type'],
-                                "id":"www.ncbi.nlm.nih.gov/nuccore/" + ref["id"]
+                                "id":ref["id"],
+                                "Link":"https://www.ncbi.nlm.nih.gov/nuccore/" + ref["id"]
                             })
                         elif ref['type']=='PDB':
                             references.append({
                                 "type":ref['type'],
-                                "id":"cdn.rcsb.org/images/structures/" + ref["id"][1:-1].lower() + "/" + ref["id"].lower()  + "/" + ref["id"].lower() + "_model-1.jpeg"
+                                "id":ref["id"],
+                                "Link":f"https://www.rcsb.org/structure/{ref['id']}",
+                                "img":"http://cdn.rcsb.org/images/structures/" + ref["id"][1:-1].lower() + "/" + ref["id"].lower()  + "/" + ref["id"].lower() + "_model-1.jpeg"
                             })
                         else:
                             references.append({
@@ -169,39 +175,31 @@ def run():
                             })
 
                 #Add to full_response
-                full_response.append({
-                    "accession":accession,
-                    "url":uniLink,
-                    "data":{
-                        "Name":protName,
-                        "Organism":orgName,
-                        "Sequence":protSeq
-                    },
-                    "citation":{
-                        "Title":title,
-                        "Authors":authors,
-                        "Journal":journal
-                    },
-                    "crossref":references
+                full_response["data"].append({
+                    "Name":protName,
+                    "Organism":orgName,
+                    "Publication Title":title,
+                    "Authors":", ".join(authors),
+                    "Journal":journal,
+                    "Accession ID":accession,
+                    "Link":uniLink,
+                    "Cross References":references
                 })
 
         else:
-            full_response = "No Results"
+            full_response = {"status":"No Results"}
     else:
-        full_response = "Not a protein"
-
+        full_response = {"status":"Not a protein"}
     cwd = os.getcwd()
-    filename = os.path.join(cwd, "Test.html")
+    filename = os.path.join(cwd, "Uniprot.html")
+
+    # with open("uniprot_output.json", "w") as f:
+    #     f.write(json.dumps(full_response))
 
     try:
         with open(filename, 'r') as htmlfile:
             result = htmlfile.read()
-
-        #####################################
-        #html stuff goes here
-        result = result.replace("URL_REPLACE", "sup")
-        #####################################
-
+        result = result.replace("UNIPROT_BLAST_OUTPUT", json.dumps(full_response))
 
         return result
     except Exception as e:
