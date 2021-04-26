@@ -8,6 +8,7 @@ Check it is up using localhost:8080.
 
 ## Using Python
 Clone the github repository to your local computer.
-In that directory, run `pip install -r requirements.txt` to install the requirements. 
+Ensure that a java compiler is installed.
+In that directory, run `pip install -r requirements.txt` to install the requirements.
 Then run `FLASK_APP=app python -m flask run`. 
 A flask module will run at localhost:5000/.
