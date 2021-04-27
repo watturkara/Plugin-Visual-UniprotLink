@@ -4,3 +4,4 @@ venv
 Results.txt
 uniprot_output.json
 cache/*
+java/Results.txt

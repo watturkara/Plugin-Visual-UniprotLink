@@ -138,7 +138,7 @@ def run():
         if page_id in os.listdir("./cache"):
             with open("./cache/" + page_id) as qfile:
                 full_response = json.load(qfile)
-            with open(os.path.join(cwd, "Uniprot.html"), "r") as htmlfile:
+            with open(os.path.join(cwd, "html/Uniprot.html"), "r") as htmlfile:
                 result = htmlfile.read()
                 result = result.replace(
                     "UNIPROT_BLAST_OUTPUT", json.dumps(full_response)
@@ -157,25 +157,25 @@ def run():
 
             # Run blast
             subprocess.run(
-                ["javac", "-d", "classes", "-classpath", "lib/*", "BlastMod.java"]
+                ["javac", "-d", "./java/classes", "-classpath", "./java/lib/*", "./java/BlastMod.java"]
             )
             subprocess.run(
                 [
                     "java",
                     "-classpath",
-                    "classes:lib/*",
+                    "./java/classes:./java/lib/*",
                     "uk.ac.ebi.uniprot.dataservice.client.examples.BlastMod",
                     protSeq,
                 ]
             )
-
             # Retreive accessions
-            my_file = open("Results.txt")
+            my_file = open("./java/Results.txt")
             content = my_file.readlines()
             my_file.close()
 
             # Check whether hits were returned
             if content[0] != "None":
+                print("finished BLAST")
                 # Collect necessary information
                 full_response = []
                 full_response = {"status": "", "data": []}
@@ -190,7 +190,7 @@ def run():
                     if not r.ok:
                         r.raise_for_status()
                         sys.exit()
-
+                    
                     responseBody = r.text
                     responseBody = json.loads(responseBody)
 
@@ -259,6 +259,8 @@ def run():
                             "Cross References": references,
                         }
                     )
+                
+                print("finshed part searching")
                 full_response["status"]="success"
                 # Cache full response to prevent repeating queries
                 cache_data(page_id, full_response)
@@ -267,13 +269,13 @@ def run():
                 full_response = {"status": "No Results"}
         else:
             full_response = {"status": "Not a protein"}
-        filename = os.path.join(cwd, "Uniprot.html")
+        filename = os.path.join(cwd, "html/Uniprot.html")
         with open(filename, "r") as htmlfile:
             result = htmlfile.read()
         result = result.replace("UNIPROT_BLAST_OUTPUT", json.dumps(full_response))
         return result
     except Exception as e:
-        with open(os.path.join(cwd, "error.html"), "r") as htmlfile:
+        with open(os.path.join(cwd, "html/error.html"), "r") as htmlfile:
             result = htmlfile.read()
         print(traceback.format_exc())
         return result, 299
