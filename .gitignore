@@ -3,3 +3,4 @@ venv
 .DS_Store
 Results.txt
 uniprot_output.json
+cache/*
