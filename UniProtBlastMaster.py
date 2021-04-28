@@ -169,7 +169,7 @@ def run():
                 ]
             )
             # Retreive accessions
-            my_file = open("./java/Results.txt")
+            my_file = open("Results.txt")
             content = my_file.readlines()
             my_file.close()
 
@@ -269,12 +269,15 @@ def run():
                 full_response = {"status": "No Results"}
         else:
             full_response = {"status": "Not a protein"}
+        # Renders the file if there are no errors
         filename = os.path.join(cwd, "html/Uniprot.html")
         with open(filename, "r") as htmlfile:
             result = htmlfile.read()
         result = result.replace("UNIPROT_BLAST_OUTPUT", json.dumps(full_response))
         return result
     except Exception as e:
+        # Renders the error html and prints the traceback
+        # to the server if an error occurs
         with open(os.path.join(cwd, "html/error.html"), "r") as htmlfile:
             result = htmlfile.read()
         print(traceback.format_exc())
